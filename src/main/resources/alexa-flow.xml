@@ -1,0 +1,18 @@
+<flow>
+
+	<state name="page1">
+		<transition onIntent="forward" to="page2" />
+		<transition onIntent="left" to="page3" />
+	</state>
+
+	<state name="page2">
+		<transition onIntent="back" to="page1" />
+	</state>
+
+	<state name="page3">
+		<transition onIntent="back" to="page1" />
+		<transition onIntent="forward" to="page4" />
+	</state>
+
+	<state name="page4" />
+</flow>
