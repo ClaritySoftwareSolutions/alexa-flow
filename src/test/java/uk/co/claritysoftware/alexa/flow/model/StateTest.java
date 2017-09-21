@@ -1,8 +1,10 @@
 package uk.co.claritysoftware.alexa.flow.model;
 
+import static java.util.Collections.EMPTY_LIST;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 import static uk.co.claritysoftware.alexa.flow.model.Transition.transitionBuilder;
 
 import java.util.Optional;
@@ -14,37 +16,41 @@ import uk.co.claritysoftware.alexa.flow.action.SpeechletStateAction;
  */
 public class StateTest {
 
+	private static final Transition TRANSITION_1 = transitionBuilder()
+			.onIntent("intent1")
+			.to("some-state")
+			.build();
+
+	private static final Transition TRANSITION_2 = transitionBuilder()
+			.onIntent("intent2")
+			.to("other-state")
+			.build();
+
 	@Test
 	public void shouldGetTransition() {
 		// Given
-		Transition transition1 = transitionBuilder()
-				.onIntent("intent1").build();
-		Transition transition2 = transitionBuilder()
-				.onIntent("intent2").build();
 		State<SpeechletStateAction> state = State.<SpeechletStateAction>stateBuilder()
 				.id("state1")
-				.transition(transition1)
-				.transition(transition2)
+				.transition(TRANSITION_1)
+				.transition(TRANSITION_2)
+				.action(mock(SpeechletStateAction.class))
 				.build();
 
 		// When
 		Optional<Transition> transition = state.getTransition("intent2");
 
 		// Then
-		assertThat(transition.get(), equalTo(transition2));
+		assertThat(transition.get(), equalTo(TRANSITION_2));
 	}
 
 	@Test
 	public void shouldNotGetTransitionGivenUnknownIntentName() {
 		// Given
-		Transition transition1 = transitionBuilder()
-				.onIntent("intent1").build();
-		Transition transition2 = transitionBuilder()
-				.onIntent("intent2").build();
 		State<SpeechletStateAction> state = State.<SpeechletStateAction>stateBuilder()
 				.id("state1")
-				.transition(transition1)
-				.transition(transition2)
+				.transition(TRANSITION_1)
+				.transition(TRANSITION_2)
+				.action(mock(SpeechletStateAction.class))
 				.build();
 
 		// When
@@ -58,6 +64,8 @@ public class StateTest {
 	public void shouldNotGetTransitionGivenNoRegisteredTransitions() {
 		// Given
 		State<SpeechletStateAction> state = State.<SpeechletStateAction>stateBuilder()
+				.transitions(EMPTY_LIST)
+				.action(mock(SpeechletStateAction.class))
 				.id("state1").build();
 
 		// When

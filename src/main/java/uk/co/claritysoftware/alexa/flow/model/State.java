@@ -5,26 +5,27 @@ import java.util.Set;
 import uk.co.claritysoftware.alexa.flow.action.StateAction;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.NonNull;
 import lombok.Singular;
+import lombok.Value;
 
 /**
  * Class describing a state or point within an Alexa skill flow with a {@link StateAction} of type {@link T}
- *
- * Deliberately not immutable so that setters are available for bean creation in xml if required
  */
-@Data
+@Value
 @Builder(builderMethodName = "stateBuilder")
 public class State<T extends StateAction> {
 
 	/**
 	 * The id of this state, such that it can be referenced
 	 */
+	@NonNull
 	private String id;
 
 	/**
 	 * The {@link StateAction<T>} that should be executed on entering this state
 	 */
+	@NonNull
 	private T action;
 
 	/**
@@ -42,7 +43,7 @@ public class State<T extends StateAction> {
 	 */
 	public Optional<Transition> getTransition(final String intentName) {
 		return Optional.ofNullable(transitions.stream()
-				.filter(transition -> intentName.equals(transition.getOnIntent()))
+				.filter(transition -> transition.getOnIntent().equals(intentName))
 				.findFirst()
 				.orElse(null));
 	}

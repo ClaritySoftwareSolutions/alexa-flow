@@ -31,9 +31,24 @@ public class FlowSpeechlet implements SpeechletV2 {
 
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>Returns the {@link SpeechletResponse} from the {@link SpeechletStateAction#doAction(SpeechletRequestEnvelope)} method
+	 * of the {@link State} registered as the initial state of the {@link Flow}.</p>
+	 *
+	 * @throws IllegalStateException if the initial state cannot be found.
+	 */
 	@Override
 	public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> requestEnvelope) {
-		return null;
+		Session session = requestEnvelope.getSession();
+		State<SpeechletStateAction> initialState = flow.getInitialState()
+				.orElseThrow(() -> new IllegalStateException(String.format("Flow does not contain state matching initialStateId %s", flow.getInitialStateId())));
+
+		SpeechletResponse response = initialState.getAction().doAction(requestEnvelope);
+		session.setAttribute(CURRENT_STATE, flow.getInitialStateId());
+
+		return response;
 	}
 
 	@Override
