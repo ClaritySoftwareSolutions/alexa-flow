@@ -9,7 +9,7 @@ import static uk.co.claritysoftware.alexa.flow.model.Transition.transitionBuilde
 
 import java.util.Optional;
 import org.junit.Test;
-import uk.co.claritysoftware.alexa.flow.action.SpeechletStateAction;
+import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
 
 /**
  * Unit test class for {@link State}
@@ -29,11 +29,11 @@ public class StateTest {
 	@Test
 	public void shouldGetTransition() {
 		// Given
-		State<SpeechletStateAction> state = State.<SpeechletStateAction>stateBuilder()
+		State<IntentSpeechletStateAction> state = State.<IntentSpeechletStateAction>stateBuilder()
 				.id("state1")
 				.transition(TRANSITION_1)
 				.transition(TRANSITION_2)
-				.action(mock(SpeechletStateAction.class))
+				.action(mock(IntentSpeechletStateAction.class))
 				.build();
 
 		// When
@@ -46,11 +46,11 @@ public class StateTest {
 	@Test
 	public void shouldNotGetTransitionGivenUnknownIntentName() {
 		// Given
-		State<SpeechletStateAction> state = State.<SpeechletStateAction>stateBuilder()
+		State<IntentSpeechletStateAction> state = State.<IntentSpeechletStateAction>stateBuilder()
 				.id("state1")
 				.transition(TRANSITION_1)
 				.transition(TRANSITION_2)
-				.action(mock(SpeechletStateAction.class))
+				.action(mock(IntentSpeechletStateAction.class))
 				.build();
 
 		// When
@@ -63,9 +63,9 @@ public class StateTest {
 	@Test
 	public void shouldNotGetTransitionGivenNoRegisteredTransitions() {
 		// Given
-		State<SpeechletStateAction> state = State.<SpeechletStateAction>stateBuilder()
+		State<IntentSpeechletStateAction> state = State.<IntentSpeechletStateAction>stateBuilder()
 				.transitions(EMPTY_LIST)
-				.action(mock(SpeechletStateAction.class))
+				.action(mock(IntentSpeechletStateAction.class))
 				.id("state1").build();
 
 		// When

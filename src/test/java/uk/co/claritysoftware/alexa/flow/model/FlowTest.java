@@ -9,64 +9,70 @@ import static uk.co.claritysoftware.alexa.flow.model.Transition.transitionBuilde
 
 import java.util.Optional;
 import org.junit.Test;
-import uk.co.claritysoftware.alexa.flow.action.SpeechletStateAction;
+import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
+import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
 
 /**
  * Unit test class for {@link Flow}
  */
 public class FlowTest {
 
-	private static final State<SpeechletStateAction> STATE_1 = State.<SpeechletStateAction>stateBuilder()
-			.id("state1")
-			.action(mock(SpeechletStateAction.class))
+	private static final State<LaunchSpeechletStateAction> INITIAL_STATE = State.<LaunchSpeechletStateAction>stateBuilder()
+			.id("launch-state")
+			.action(mock(LaunchSpeechletStateAction.class))
 			.build();
 
-	private static final State<SpeechletStateAction> STATE_2 = State.<SpeechletStateAction>stateBuilder()
+	private static final State<IntentSpeechletStateAction> STATE_1 = State.<IntentSpeechletStateAction>stateBuilder()
+			.id("state1")
+			.action(mock(IntentSpeechletStateAction.class))
+			.build();
+
+	private static final State<IntentSpeechletStateAction> STATE_2 = State.<IntentSpeechletStateAction>stateBuilder()
 			.id("state2")
-			.action(mock(SpeechletStateAction.class))
+			.action(mock(IntentSpeechletStateAction.class))
 			.build();
 
 	@Test
-	public void shouldGetSpeechletState() {
+	public void shouldGetIntentState() {
 		// Given
 		Flow flow = flowBuilder()
-				.speechletState(STATE_1)
-				.speechletState(STATE_2)
-				.initialStateId("state1")
+				.initialState(INITIAL_STATE)
+				.intentState(STATE_1)
+				.intentState(STATE_2)
 				.build();
 
 		// When
-		Optional<State<SpeechletStateAction>> state = flow.getSpeechletState("state1");
+		Optional<State<IntentSpeechletStateAction>> state = flow.getIntentState("state1");
 
 		// Then
 		assertThat(state.get(), equalTo(STATE_1));
 	}
 
 	@Test
-	public void shouldNotGetSpeechletStateGivenUnknownStateId() {
+	public void shouldNotGetIntentStateGivenUnknownStateId() {
 		// Given
 		Flow flow = flowBuilder()
-				.speechletState(STATE_1)
-				.speechletState(STATE_2)
-				.initialStateId("state1")
+				.initialState(INITIAL_STATE)
+				.intentState(STATE_1)
+				.intentState(STATE_2)
 				.build();
 
 		// When
-		Optional<State<SpeechletStateAction>> state = flow.getSpeechletState("some-unknown-state-id");
+		Optional<State<IntentSpeechletStateAction>> state = flow.getIntentState("some-unknown-state-id");
 
 		// Then
 		assertThat(state.isPresent(), is(false));
 	}
 
 	@Test
-	public void shouldNotGetSpeechletStateGivenNoRegisteredStates() {
+	public void shouldNotGetIntentStateGivenNoRegisteredStates() {
 		// Given
 		Flow flow = flowBuilder()
-				.initialStateId("state1")
+				.initialState(INITIAL_STATE)
 				.build();
 
 		// When
-		Optional<State<SpeechletStateAction>> state = flow.getSpeechletState("some-unknown-state-id");
+		Optional<State<IntentSpeechletStateAction>> state = flow.getIntentState("some-unknown-state-id");
 
 		// Then
 		assertThat(state.isPresent(), is(false));
@@ -76,92 +82,61 @@ public class FlowTest {
 	public void shouldGetInitialState() {
 		// Given
 		Flow flow = flowBuilder()
-				.speechletState(STATE_1)
-				.speechletState(STATE_2)
-				.initialStateId("state1")
+				.initialState(INITIAL_STATE)
+				.intentState(STATE_1)
 				.build();
 
 		// When
-		Optional<State<SpeechletStateAction>> state = flow.getInitialState();
+		State<LaunchSpeechletStateAction> state = flow.getInitialState();
 
 		// Then
-		assertThat(state.get(), equalTo(STATE_1));
-	}
-
-	@Test
-	public void shouldNotGetInitialStateGivenInitialStateIsInvalidForFlow() {
-		// Given
-		Flow flow = flowBuilder()
-				.speechletState(STATE_1)
-				.speechletState(STATE_2)
-				.initialStateId("some-unknown-state-id")
-				.build();
-
-		// When
-		Optional<State<SpeechletStateAction>> state = flow.getInitialState();
-
-		// Then
-		assertThat(state.isPresent(), is(false));
-	}
-
-	@Test
-	public void shouldNotGetInitialStateGivenNoRegisteredStates() {
-		// Given
-		Flow flow = flowBuilder()
-				.initialStateId("state1")
-				.build();
-
-		// When
-		Optional<State<SpeechletStateAction>> state = flow.getInitialState();
-
-		// Then
-		assertThat(state.isPresent(), is(false));
+		assertThat(state, equalTo(INITIAL_STATE));
 	}
 
 	@Test
 	public void shouldBuild() {
 		Flow flow = flowBuilder()
-				.speechletState(State.<SpeechletStateAction>stateBuilder()
+				.initialState(State.<LaunchSpeechletStateAction>stateBuilder()
+						.id("initial-state")
+						.transition(transitionBuilder()
+								.onIntent("forwardIntent").to("page1")
+								.build())
+						.action(mock(LaunchSpeechletStateAction.class))
+						.build())
+				.intentState(State.<IntentSpeechletStateAction>stateBuilder()
 						.id("page1")
 						// .action()
 						.transition(transitionBuilder()
-								.onIntent("formwardIntent")
-								.to("page2")
+								.onIntent("formwardIntent").to("page2")
 								.build())
 						.transition(transitionBuilder()
-								.onIntent("leftIntent")
-								.to("page3")
+								.onIntent("leftIntent").to("page3")
 								.build())
-						.action(mock(SpeechletStateAction.class))
+						.action(mock(IntentSpeechletStateAction.class))
 						.build())
-				.speechletState(State.<SpeechletStateAction>stateBuilder()
+				.intentState(State.<IntentSpeechletStateAction>stateBuilder()
 						.id("page2")
 						// .action()
 						.transition(transitionBuilder()
-								.onIntent("backIntent")
-								.to("page1")
+								.onIntent("backIntent").to("page1")
 								.build())
-						.action(mock(SpeechletStateAction.class))
+						.action(mock(IntentSpeechletStateAction.class))
 						.build())
-				.speechletState(State.<SpeechletStateAction>stateBuilder()
+				.intentState(State.<IntentSpeechletStateAction>stateBuilder()
 						.id("page3")
 						// .action()
 						.transition(transitionBuilder()
-								.onIntent("backIntent")
-								.to("page1")
+								.onIntent("backIntent").to("page1")
 								.build())
 						.transition(transitionBuilder()
-								.onIntent("forwardIntent")
-								.to("page4")
+								.onIntent("forwardIntent").to("page4")
 								.build())
-						.action(mock(SpeechletStateAction.class))
+						.action(mock(IntentSpeechletStateAction.class))
 						.build())
-				.speechletState(State.<SpeechletStateAction>stateBuilder()
+				.intentState(State.<IntentSpeechletStateAction>stateBuilder()
 						.id("page4")
-						// .action()
-						.action(mock(SpeechletStateAction.class))
+						.action(mock(IntentSpeechletStateAction.class))
 						.build())
-				.initialStateId("page1")
 				.build();
 	}
 

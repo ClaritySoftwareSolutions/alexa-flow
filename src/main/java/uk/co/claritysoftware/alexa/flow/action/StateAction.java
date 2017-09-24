@@ -6,13 +6,13 @@ import com.amazon.speech.speechlet.SpeechletRequest;
 /**
  * A StateAction is called as part of transitioning from one state to the next
  */
-public interface StateAction<T> {
+public interface StateAction<ENVELOPE_TYPE extends SpeechletRequestEnvelope<? extends SpeechletRequest>, RETURN_TYPE> {
 
 	/**
 	 * Method to perform the action
 	 *
 	 * @param requestEnvelope the entire request envelope from the Alexa request
-	 * @return the result of the action whose type is {@link T}
+	 * @return the result of the action whose type is {@link RETURN_TYPE}
 	 */
-	T doAction(SpeechletRequestEnvelope<? extends SpeechletRequest> requestEnvelope);
+	RETURN_TYPE doAction(ENVELOPE_TYPE requestEnvelope);
 }

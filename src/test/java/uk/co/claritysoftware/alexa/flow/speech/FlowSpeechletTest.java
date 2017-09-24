@@ -1,20 +1,25 @@
 package uk.co.claritysoftware.alexa.flow.speech;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.co.claritysoftware.alexa.flow.model.Flow.flowBuilder;
 import static uk.co.claritysoftware.alexa.testsupport.SpeechletRequestEnvelopeTestDataFactory.launchSpeechletRequestEnvelopeWithSession;
+import static uk.co.claritysoftware.alexa.testsupport.SpeechletRequestEnvelopeTestDataFactory.speechletRequestEnvelope;
 
 import org.junit.Test;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
+import com.amazon.speech.slu.Intent;
+import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.LaunchRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import uk.co.claritysoftware.alexa.flow.action.SpeechletStateAction;
+import uk.co.claritysoftware.alexa.flow.action.FlowNotLaunchedAction;
+import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
 import uk.co.claritysoftware.alexa.flow.model.Flow;
 import uk.co.claritysoftware.alexa.flow.model.State;
 
@@ -23,76 +28,68 @@ import uk.co.claritysoftware.alexa.flow.model.State;
  */
 public class FlowSpeechletTest {
 
+	private static final String INITIAL_STATE_ID = "initial-state";
+
+	private Session session = mock(Session.class);
+
+	private FlowNotLaunchedAction flowNotLaunchedAction = mock(FlowNotLaunchedAction.class);
+
+	private LaunchSpeechletStateAction initialStateAction = mock(LaunchSpeechletStateAction.class);
+
+	private State<LaunchSpeechletStateAction> initialState = State.<LaunchSpeechletStateAction>stateBuilder()
+			.id(INITIAL_STATE_ID)
+			.action(initialStateAction)
+			.build();
+
 	@Test
 	public void shouldOnLaunch() {
 		// Given
-		String initialStateId = "state1";
-		SpeechletStateAction stateAction = mock(SpeechletStateAction.class);
-
-		State<SpeechletStateAction> state1 = State.<SpeechletStateAction>stateBuilder()
-				.id(initialStateId)
-				.action(stateAction)
-				.build();
 		Flow flow = flowBuilder()
-				.initialStateId(initialStateId)
-				.speechletState(state1)
+				.initialState(initialState)
 				.build();
 
-		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow);
-
-		Session session = mock(Session.class);
+		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow, flowNotLaunchedAction);
 
 		SpeechletRequestEnvelope<LaunchRequest> requestEnvelope = launchSpeechletRequestEnvelopeWithSession(session);
 
 		SpeechletResponse expectedResponse = new SpeechletResponse();
-		given(stateAction.doAction(requestEnvelope))
-				.willReturn(expectedResponse);
+		given(initialStateAction.doAction(requestEnvelope)).willReturn(expectedResponse);
 
 		// When
 		SpeechletResponse speechletResponse = flowSpeechlet.onLaunch(requestEnvelope);
 
 		// Then
 		assertThat(speechletResponse).isEqualTo(expectedResponse);
-		verify(session).setAttribute("currentState", initialStateId);
+		verify(session).setAttribute("currentState", INITIAL_STATE_ID);
 	}
 
 	@Test
-	public void shouldFailToOnLaunchGivenInitialStateNotFound() {
+	public void shouldOnIntentGivenFlowNotStarted() {
 		// Given
-		String initialStateId = "non-registered-state";
-		SpeechletStateAction stateAction = mock(SpeechletStateAction.class);
-
-		State<SpeechletStateAction> state1 = State.<SpeechletStateAction>stateBuilder()
-				.id("state1")
-				.action(stateAction)
+		SpeechletRequestEnvelope<IntentRequest> requestEnvelope = speechletRequestEnvelope()
+				.withSession(session)
+				.withRequest(IntentRequest.builder()
+						.withRequestId("12345")
+						.withIntent(Intent.builder()
+								.withName("intent-1")
+								.build())
+						.build())
 				.build();
+
 		Flow flow = flowBuilder()
-				.initialStateId(initialStateId)
-				.speechletState(state1)
+				.initialState(initialState)
 				.build();
 
-		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow);
-
-		Session session = mock(Session.class);
-
-		SpeechletRequestEnvelope<LaunchRequest> requestEnvelope = launchSpeechletRequestEnvelopeWithSession(session);
+		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow, flowNotLaunchedAction);
 
 		SpeechletResponse expectedResponse = new SpeechletResponse();
-		given(stateAction.doAction(requestEnvelope))
-				.willReturn(expectedResponse);
+		given(flowNotLaunchedAction.doAction(requestEnvelope)).willReturn(expectedResponse);
 
 		// When
-		try {
-			flowSpeechlet.onLaunch(requestEnvelope);
+		SpeechletResponse speechletResponse = flowSpeechlet.onIntent(requestEnvelope);
 
-			fail("Was expecting an IllegalStateException");
-		}
 		// Then
-		catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo("Flow does not contain state matching initialStateId non-registered-state");
-			verify(session, never()).setAttribute("currentState", initialStateId);
-			verify(stateAction, never()).doAction(requestEnvelope);
-		}
+		assertThat(speechletResponse).isEqualTo(expectedResponse);
+		verify(session, never()).setAttribute(eq("currentState"), anyString());
 	}
-
 }
