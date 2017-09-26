@@ -10,7 +10,6 @@ import static uk.co.claritysoftware.alexa.flow.model.Transition.transitionBuilde
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
-import uk.co.claritysoftware.alexa.flow.action.FlowNotLaunchedAction;
 import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
 import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
 
@@ -34,8 +33,6 @@ public class FlowTest {
 			.action(mock(IntentSpeechletStateAction.class))
 			.build();
 
-	private static final FlowNotLaunchedAction FLOW_NOT_LAUNCHED_ACTION = mock(FlowNotLaunchedAction.class);
-
 	private Flow flow;
 
 	@Before
@@ -44,7 +41,6 @@ public class FlowTest {
 				.initialState(INITIAL_STATE)
 				.intentState(STATE_1)
 				.intentState(STATE_2)
-				.flowNotLaunchedAction(FLOW_NOT_LAUNCHED_ACTION)
 				.build();
 	}
 
@@ -75,7 +71,6 @@ public class FlowTest {
 		// Given
 		Flow flow = flowBuilder()
 				.initialState(INITIAL_STATE)
-				.flowNotLaunchedAction(FLOW_NOT_LAUNCHED_ACTION)
 				.build();
 
 		// When
@@ -140,7 +135,6 @@ public class FlowTest {
 						.id("page4")
 						.action(mock(IntentSpeechletStateAction.class))
 						.build())
-				.flowNotLaunchedAction(FLOW_NOT_LAUNCHED_ACTION)
 				.build();
 	}
 

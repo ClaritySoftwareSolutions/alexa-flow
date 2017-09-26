@@ -69,7 +69,7 @@ public class FlowSpeechlet implements SpeechletV2 {
 		// get current state id (string) from session
 		String currentStateId = (String) session.getAttribute(CURRENT_STATE);
 		if (StringUtils.isBlank(currentStateId)) {
-			return flow.getFlowNotLaunchedAction().doAction(requestEnvelope);
+			return onLaunch(launchRequestEnvelope(requestEnvelope));
 		}
 
 		// get intent (string) from request

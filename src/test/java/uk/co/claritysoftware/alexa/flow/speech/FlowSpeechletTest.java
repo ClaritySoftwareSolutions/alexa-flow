@@ -2,10 +2,8 @@ package uk.co.claritysoftware.alexa.flow.speech;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static uk.co.claritysoftware.alexa.flow.model.Flow.flowBuilder;
 import static uk.co.claritysoftware.alexa.testsupport.SpeechletRequestEnvelopeTestDataFactory.launchSpeechletRequestEnvelopeWithSession;
@@ -18,7 +16,6 @@ import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.LaunchRequest;
 import com.amazon.speech.speechlet.Session;
 import com.amazon.speech.speechlet.SpeechletResponse;
-import uk.co.claritysoftware.alexa.flow.action.FlowNotLaunchedAction;
 import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
 import uk.co.claritysoftware.alexa.flow.model.Flow;
 import uk.co.claritysoftware.alexa.flow.model.State;
@@ -32,8 +29,6 @@ public class FlowSpeechletTest {
 
 	private Session session = mock(Session.class);
 
-	private FlowNotLaunchedAction flowNotLaunchedAction = mock(FlowNotLaunchedAction.class);
-
 	private LaunchSpeechletStateAction initialStateAction = mock(LaunchSpeechletStateAction.class);
 
 	private State<LaunchSpeechletStateAction> initialState = State.<LaunchSpeechletStateAction>stateBuilder()
@@ -46,7 +41,6 @@ public class FlowSpeechletTest {
 		// Given
 		Flow flow = flowBuilder()
 				.initialState(initialState)
-				.flowNotLaunchedAction(flowNotLaunchedAction)
 				.build();
 
 		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow);
@@ -79,19 +73,18 @@ public class FlowSpeechletTest {
 
 		Flow flow = flowBuilder()
 				.initialState(initialState)
-				.flowNotLaunchedAction(flowNotLaunchedAction)
 				.build();
 
 		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow);
 
 		SpeechletResponse expectedResponse = new SpeechletResponse();
-		given(flowNotLaunchedAction.doAction(requestEnvelope)).willReturn(expectedResponse);
+		given(initialStateAction.doAction(any(SpeechletRequestEnvelope.class))).willReturn(expectedResponse);
 
 		// When
 		SpeechletResponse speechletResponse = flowSpeechlet.onIntent(requestEnvelope);
 
 		// Then
 		assertThat(speechletResponse).isEqualTo(expectedResponse);
-		verify(session, never()).setAttribute(eq("currentState"), anyString());
+		verify(session).setAttribute("currentState", INITIAL_STATE_ID);
 	}
 }
