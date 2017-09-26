@@ -3,6 +3,7 @@ package uk.co.claritysoftware.alexa.flow.model;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import uk.co.claritysoftware.alexa.flow.action.FlowNotLaunchedAction;
 import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
 import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
 
@@ -21,6 +22,9 @@ import lombok.Value;
 @Builder(builderMethodName = "flowBuilder")
 public class Flow {
 
+	/**
+	 * The {@link State<LaunchSpeechletStateAction> state} that is entered when the flow starts
+	 */
 	@NonNull
 	private State<LaunchSpeechletStateAction> initialState;
 
@@ -30,6 +34,13 @@ public class Flow {
 	@Singular
 	@NonNull
 	private Set<State<IntentSpeechletStateAction>> intentStates;
+
+	/**
+	 * The {@link FlowNotLaunchedAction action} that is triggered when the flow is started with an intent,
+	 * IE. before the {@link Flow#initialState} has been entered.
+	 */
+	@NonNull
+	private FlowNotLaunchedAction flowNotLaunchedAction;
 
 	/**
 	 * Finds and returns the {@link State<IntentSpeechletStateAction>} from this flow based on its id,

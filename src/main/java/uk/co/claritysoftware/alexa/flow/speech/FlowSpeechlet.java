@@ -9,7 +9,6 @@ import com.amazon.speech.speechlet.SessionEndedRequest;
 import com.amazon.speech.speechlet.SessionStartedRequest;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.speechlet.SpeechletV2;
-import uk.co.claritysoftware.alexa.flow.action.FlowNotLaunchedAction;
 import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
 import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
 import uk.co.claritysoftware.alexa.flow.model.Flow;
@@ -25,11 +24,8 @@ public class FlowSpeechlet implements SpeechletV2 {
 
 	private final Flow flow;
 
-	private final FlowNotLaunchedAction flowNotLaunchedAction;
-
-	public FlowSpeechlet(final Flow flow, final FlowNotLaunchedAction flowNotLaunchedAction) {
+	public FlowSpeechlet(final Flow flow) {
 		this.flow = flow;
-		this.flowNotLaunchedAction = flowNotLaunchedAction;
 	}
 
 	@Override
@@ -73,7 +69,7 @@ public class FlowSpeechlet implements SpeechletV2 {
 		// get current state id (string) from session
 		String currentStateId = (String) session.getAttribute(CURRENT_STATE);
 		if (StringUtils.isBlank(currentStateId)) {
-			return flowNotLaunchedAction.doAction(requestEnvelope);
+			return flow.getFlowNotLaunchedAction().doAction(requestEnvelope);
 		}
 
 		// get intent (string) from request

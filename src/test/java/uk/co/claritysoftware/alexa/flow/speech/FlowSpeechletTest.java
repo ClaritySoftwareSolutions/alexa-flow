@@ -46,9 +46,10 @@ public class FlowSpeechletTest {
 		// Given
 		Flow flow = flowBuilder()
 				.initialState(initialState)
+				.flowNotLaunchedAction(flowNotLaunchedAction)
 				.build();
 
-		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow, flowNotLaunchedAction);
+		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow);
 
 		SpeechletRequestEnvelope<LaunchRequest> requestEnvelope = launchSpeechletRequestEnvelopeWithSession(session);
 
@@ -78,9 +79,10 @@ public class FlowSpeechletTest {
 
 		Flow flow = flowBuilder()
 				.initialState(initialState)
+				.flowNotLaunchedAction(flowNotLaunchedAction)
 				.build();
 
-		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow, flowNotLaunchedAction);
+		FlowSpeechlet flowSpeechlet = new FlowSpeechlet(flow);
 
 		SpeechletResponse expectedResponse = new SpeechletResponse();
 		given(flowNotLaunchedAction.doAction(requestEnvelope)).willReturn(expectedResponse);
