@@ -10,6 +10,28 @@
 	<description>Java Spring library to provide skill intent flow control</description>
 	<url>https://github.com/ClaritySoftwareSolutions/spring-alexa-flow</url>
 
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
+
+	<developers>
+		<developer>
+			<name>Nathah Russell</name>
+			<email>nathan@claritysoftware.co.uk</email>
+			<organization>Clarity Software Solutions</organization>
+			<organizationUrl>https://claritysoftware.co.uk</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/ClaritySoftwareSolutions/spring-alexa-flow.git</connection>
+		<developerConnection>scm:git:https://github.com/ClaritySoftwareSolutions/spring-alexa-flow.git</developerConnection>
+		<url>https://github.com/ClaritySoftwareSolutions/spring-alexa-flow</url>
+	</scm>
+
 	<properties>
 		<java.version>1.8</java.version>
 		<spring.version>4.3.8.RELEASE</spring.version>
@@ -25,6 +47,8 @@
 		<system-rules.version>1.16.0</system-rules.version>
 		<equalsverifier.version>2.3.1</equalsverifier.version>
 		<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
+		<maven-source-plugin.version>2.4</maven-source-plugin.version>
+		<maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
 		<maven-failsafe-plugin.version>2.20</maven-failsafe-plugin.version>
 		<maven-surefire-plugin.version>2.20</maven-surefire-plugin.version>
 	</properties>
@@ -120,6 +144,34 @@
 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>${maven-source-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>${maven-javadoc-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>attach-javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>${maven-surefire-plugin.version}</version>
 			</plugin>
@@ -151,9 +203,9 @@
 					<flowInitContext>
 						<masterBranchName>master</masterBranchName>
 						<developBranchName>develop</developBranchName>
-						<featureBranchPrefix>feature-</featureBranchPrefix>
-						<releaseBranchPrefix>release-</releaseBranchPrefix>
-						<hotfixBranchPrefix>hotfix-</hotfixBranchPrefix>
+						<featureBranchPrefix>feature/</featureBranchPrefix>
+						<releaseBranchPrefix>release/</releaseBranchPrefix>
+						<hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
 					</flowInitContext>
 				</configuration>
 			</plugin>
