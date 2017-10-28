@@ -5,18 +5,17 @@ import static uk.co.claritysoftware.alexa.flow.Application.getBean;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.amazon.speech.speechlet.lambda.SpeechletRequestStreamHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import uk.co.claritysoftware.alexa.flow.speech.FlowSpeechlet;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Main {@link RequestStreamHandler} for the Flow
  */
+@Slf4j
 public final class FlowStreamHandler extends SpeechletRequestStreamHandler {
-
-	private static final Logger LOG = LoggerFactory.getLogger(FlowStreamHandler.class);
 
 	private static final String APPLICATION_IDS = "com_amazon_speech_speechlet_servlet_supportedApplicationIds";
 
@@ -35,7 +34,7 @@ public final class FlowStreamHandler extends SpeechletRequestStreamHandler {
 			throw new IllegalStateException("Cannot instantiate FlowStreamHandler with null or empty " + APPLICATION_IDS + " system property");
 		}
 
-		LOG.trace("Returning application ids {}", applicationIds);
+		log.trace("Returning application ids {}", applicationIds);
 		return applicationIds;
 	}
 }

@@ -14,7 +14,7 @@ import lombok.Value;
  */
 @Value
 @Builder(builderMethodName = "stateBuilder")
-public class State<T extends StateAction> {
+public class State {
 
 	/**
 	 * The id of this state, such that it can be referenced
@@ -23,10 +23,10 @@ public class State<T extends StateAction> {
 	private String id;
 
 	/**
-	 * The {@link StateAction<T>} that should be executed on entering this state
+	 * The {@link StateAction} that should be executed on entering this state
 	 */
 	@NonNull
-	private T action;
+	private StateAction action;
 
 	/**
 	 * The set of {@link Transition transitions} that this state can transition or move to

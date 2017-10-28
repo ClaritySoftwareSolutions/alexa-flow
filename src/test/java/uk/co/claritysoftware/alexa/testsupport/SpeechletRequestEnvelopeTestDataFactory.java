@@ -92,6 +92,15 @@ public class SpeechletRequestEnvelopeTestDataFactory<T extends SpeechletRequest>
 				.build();
 	}
 
+	public static SpeechletRequestEnvelope<SessionStartedRequest> sessionStartedSpeechletRequestEnvelope(final Session session) {
+		return speechletRequestEnvelope()
+				.withSession(session)
+				.withRequest(SessionStartedRequest.builder()
+						.withRequestId("12345")
+						.build())
+				.build();
+	}
+
 	public static SpeechletRequestEnvelope<LaunchRequest> launchSpeechletRequestEnvelope() {
 		return speechletRequestEnvelope()
 				.withRequest(LaunchRequest.builder()

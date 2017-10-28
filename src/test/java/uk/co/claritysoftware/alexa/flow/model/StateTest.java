@@ -5,11 +5,12 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static uk.co.claritysoftware.alexa.flow.model.State.stateBuilder;
 import static uk.co.claritysoftware.alexa.flow.model.Transition.transitionBuilder;
 
 import java.util.Optional;
 import org.junit.Test;
-import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
+import uk.co.claritysoftware.alexa.flow.action.StateAction;
 
 /**
  * Unit test class for {@link State}
@@ -29,11 +30,11 @@ public class StateTest {
 	@Test
 	public void shouldGetTransition() {
 		// Given
-		State<IntentSpeechletStateAction> state = State.<IntentSpeechletStateAction>stateBuilder()
+		State state = stateBuilder()
 				.id("state1")
 				.transition(TRANSITION_1)
 				.transition(TRANSITION_2)
-				.action(mock(IntentSpeechletStateAction.class))
+				.action(mock(StateAction.class))
 				.build();
 
 		// When
@@ -46,11 +47,11 @@ public class StateTest {
 	@Test
 	public void shouldNotGetTransitionGivenUnknownIntentName() {
 		// Given
-		State<IntentSpeechletStateAction> state = State.<IntentSpeechletStateAction>stateBuilder()
+		State state = stateBuilder()
 				.id("state1")
 				.transition(TRANSITION_1)
 				.transition(TRANSITION_2)
-				.action(mock(IntentSpeechletStateAction.class))
+				.action(mock(StateAction.class))
 				.build();
 
 		// When
@@ -63,9 +64,9 @@ public class StateTest {
 	@Test
 	public void shouldNotGetTransitionGivenNoRegisteredTransitions() {
 		// Given
-		State<IntentSpeechletStateAction> state = State.<IntentSpeechletStateAction>stateBuilder()
+		State state = stateBuilder()
 				.transitions(EMPTY_LIST)
-				.action(mock(IntentSpeechletStateAction.class))
+				.action(mock(StateAction.class))
 				.id("state1").build();
 
 		// When

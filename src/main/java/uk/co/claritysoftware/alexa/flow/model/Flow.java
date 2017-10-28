@@ -3,8 +3,6 @@ package uk.co.claritysoftware.alexa.flow.model;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
-import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
 
 import lombok.Builder;
 import lombok.NonNull;
@@ -22,26 +20,26 @@ import lombok.Value;
 public class Flow {
 
 	/**
-	 * The {@link State<LaunchSpeechletStateAction> state} that is entered when the flow starts
+	 * The {@link State} that is entered when the flow starts
 	 */
 	@NonNull
-	private State<LaunchSpeechletStateAction> initialState;
+	private State initialState;
 
 	/**
-	 * The set of {@link State<IntentSpeechletStateAction> states} that this flow is composed of
+	 * The set of {@link State states} that this flow is composed of
 	 */
 	@Singular
 	@NonNull
-	private Set<State<IntentSpeechletStateAction>> intentStates;
+	private Set<State> intentStates;
 
 	/**
-	 * Finds and returns the {@link State<IntentSpeechletStateAction>} from this flow based on its id,
-	 * returned in an {@link Optional}
+	 * Finds and returns the {@link State} from this flow based on its id, returned in an {@link Optional}.
+	 * This method will search all intent states, and the initial state, and will return the first state that matches the specified id.
 	 *
-	 * @param id the id of the {@link State<IntentSpeechletStateAction>} to return
-	 * @return an {@link Optional} containing either the found {@link State<IntentSpeechletStateAction>} or null if not found
+	 * @param id the id of the {@link State} to return
+	 * @return an {@link Optional} containing either the found {@link State} or null if not found
 	 */
-	public Optional<State<IntentSpeechletStateAction>> getIntentState(final String id) {
+	public Optional<State> getState(final String id) {
 		Set<State> allStates = new HashSet<>();
 		allStates.addAll(intentStates);
 		allStates.add(initialState);
@@ -51,4 +49,5 @@ public class Flow {
 				.findFirst()
 				.orElse(null));
 	}
+
 }

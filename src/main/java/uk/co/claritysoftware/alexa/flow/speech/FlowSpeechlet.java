@@ -1,6 +1,5 @@
 package uk.co.claritysoftware.alexa.flow.speech;
 
-import org.apache.commons.lang3.StringUtils;
 import com.amazon.speech.json.SpeechletRequestEnvelope;
 import com.amazon.speech.speechlet.IntentRequest;
 import com.amazon.speech.speechlet.LaunchRequest;
@@ -9,15 +8,17 @@ import com.amazon.speech.speechlet.SessionEndedRequest;
 import com.amazon.speech.speechlet.SessionStartedRequest;
 import com.amazon.speech.speechlet.SpeechletResponse;
 import com.amazon.speech.speechlet.SpeechletV2;
-import uk.co.claritysoftware.alexa.flow.action.IntentSpeechletStateAction;
-import uk.co.claritysoftware.alexa.flow.action.LaunchSpeechletStateAction;
+import uk.co.claritysoftware.alexa.flow.SimpleFlowStateMachine;
+import uk.co.claritysoftware.alexa.flow.action.StateAction;
 import uk.co.claritysoftware.alexa.flow.model.Flow;
 import uk.co.claritysoftware.alexa.flow.model.State;
-import uk.co.claritysoftware.alexa.flow.model.Transition;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * The {@link SpeechletV2} that handles all flow control based on the injected {@link Flow} instance.
  */
+@Slf4j
 public class FlowSpeechlet implements SpeechletV2 {
 
 	private static final String CURRENT_STATE = "currentState";
@@ -28,77 +29,60 @@ public class FlowSpeechlet implements SpeechletV2 {
 		this.flow = flow;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>Creates a new {@link SimpleFlowStateMachine} and sets the current state id on the session.</p>
+	 */
 	@Override
 	public void onSessionStarted(SpeechletRequestEnvelope<SessionStartedRequest> requestEnvelope) {
+		log.trace("onSessionStarted requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+				requestEnvelope.getSession().getSessionId());
 
+		Session session = requestEnvelope.getSession();
+		SimpleFlowStateMachine stateMachine = new SimpleFlowStateMachine(flow);
+		session.setAttribute(CURRENT_STATE, stateMachine.getState().getId());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 *
-	 * <p>Returns the {@link SpeechletResponse} from the {@link LaunchSpeechletStateAction#doAction(SpeechletRequestEnvelope)} method
+	 * <p>Returns the {@link SpeechletResponse} from the {@link StateAction#doAction(SpeechletRequestEnvelope)} method
 	 * of the {@link State} registered as the initial state of the {@link Flow}.</p>
 	 */
 	@Override
 	public SpeechletResponse onLaunch(SpeechletRequestEnvelope<LaunchRequest> requestEnvelope) {
-		Session session = requestEnvelope.getSession();
-		State<LaunchSpeechletStateAction> initialState = flow.getInitialState();
-		SpeechletResponse response = initialState.getAction().doAction(requestEnvelope);
-		session.setAttribute(CURRENT_STATE, initialState.getId());
+		log.trace("onLaunch requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+				requestEnvelope.getSession().getSessionId());
 
-		return response;
+		Session session = requestEnvelope.getSession();
+		String currentStateId = (String) session.getAttribute(CURRENT_STATE);
+		SimpleFlowStateMachine stateMachine = new SimpleFlowStateMachine(flow, currentStateId);
+
+		return stateMachine.getAction().doAction(requestEnvelope);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>Sends the intent name to the {@link SimpleFlowStateMachine} and returns the {@link SpeechletResponse}
+	 * from the {@link StateAction#doAction(SpeechletRequestEnvelope)} method of the current {@link State}
+	 * of the {@link Flow}.</p>
+	 */
 	@Override
 	public SpeechletResponse onIntent(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
-		/**
-		 * get current state id (string) from session
-		 * get intent (string) from request
-		 * Get SpeechletState from Flow based on state id (ie. current state)
-		 * Get Transition from SpeechletState based on intent
-		 * Get state id (string) of target state from Transition
-		 * Get SpeechletState from Flow based on state id (ie. target state)
-		 * Get SpeechletStateAction from Speechlet state and execute (call doAction)
-		 * Set state id (target state) on session
-		 * Return SpeechletResponse from calling doAction of action
-		 */
+		log.trace("onIntent requestId={}, sessionId={}", requestEnvelope.getRequest().getRequestId(),
+				requestEnvelope.getSession().getSessionId());
 
 		Session session = requestEnvelope.getSession();
-		IntentRequest intentRequest = requestEnvelope.getRequest();
-
-		// get current state id (string) from session
 		String currentStateId = (String) session.getAttribute(CURRENT_STATE);
-		if (StringUtils.isBlank(currentStateId)) {
-			return onLaunch(launchRequestEnvelope(requestEnvelope));
-		}
+		SimpleFlowStateMachine stateMachine = new SimpleFlowStateMachine(flow, currentStateId);
 
-		// get intent (string) from request
-		String intentName = intentRequest.getIntent().getName();
+		String intentName = getIntentName(requestEnvelope);
+		stateMachine.send(intentName);
+		session.setAttribute(CURRENT_STATE, stateMachine.getState().getId());
 
-		// Get SpeechletState from Flow based on state id (ie. current state)
-		State<IntentSpeechletStateAction> speechletState = flow.getIntentState(currentStateId)
-				.orElseThrow(() -> new IllegalStateException(String.format("State with id %s is not registered in the flow", currentStateId)));
-
-		// Get Transition from SpeechletState based on intent
-		Transition transition = speechletState.getTransition(intentName)
-				.orElseThrow(() -> new IllegalStateException(String.format("No transition for intent name %s in state %s", intentName, speechletState)));
-
-		// Get state id (string) of target state from Transition
-		String targetStateId = transition.getTo();
-
-		// Get SpeechletState from Flow based on state id (ie. target state)
-		State<IntentSpeechletStateAction> targetSpeechletState = flow.getIntentState(targetStateId)
-				.orElseThrow(() -> new IllegalStateException(String.format("Target state with id %s is not registered in the flow", currentStateId)));
-
-		// Get SpeechletStateAction from Speechlet state and execute (call doAction)
-		IntentSpeechletStateAction stateAction = targetSpeechletState.getAction();
-		SpeechletResponse speechletResponse = stateAction.doAction(requestEnvelope);
-
-		// Set state id (target state) on session
-		session.setAttribute(CURRENT_STATE, targetStateId);
-
-		// Return SpeechletResponse from calling doAction of action
-		return speechletResponse;
+		return stateMachine.getAction().doAction(requestEnvelope);
 	}
 
 	@Override
@@ -106,20 +90,9 @@ public class FlowSpeechlet implements SpeechletV2 {
 
 	}
 
-	private SpeechletRequestEnvelope<LaunchRequest> launchRequestEnvelope(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
+	private String getIntentName(SpeechletRequestEnvelope<IntentRequest> requestEnvelope) {
 		IntentRequest intentRequest = requestEnvelope.getRequest();
-		LaunchRequest launchRequest = LaunchRequest.builder()
-				.withRequestId(intentRequest.getRequestId())
-				.withLocale(intentRequest.getLocale())
-				.withTimestamp(intentRequest.getTimestamp())
-				.build();
-
-		SpeechletRequestEnvelope<LaunchRequest> launchRequestEnvelope = SpeechletRequestEnvelope.<LaunchRequest>builder()
-				.withRequest(launchRequest)
-				.withVersion(requestEnvelope.getVersion())
-				.withSession(requestEnvelope.getSession())
-				.build();
-
-		return launchRequestEnvelope;
+		return intentRequest.getIntent().getName();
 	}
+
 }
