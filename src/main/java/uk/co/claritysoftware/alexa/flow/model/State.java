@@ -10,7 +10,7 @@ import lombok.Singular;
 import lombok.Value;
 
 /**
- * Class describing a state or point within an Alexa skill flow with a {@link StateAction} of type {@link T}
+ * Class describing a state or point within a {@link Flow}
  */
 @Value
 @Builder(builderMethodName = "stateBuilder")

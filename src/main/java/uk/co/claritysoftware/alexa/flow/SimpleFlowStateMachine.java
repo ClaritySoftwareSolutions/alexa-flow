@@ -52,7 +52,7 @@ public class SimpleFlowStateMachine {
 	/**
 	 * Triggers a state change based on the specified intent name
 	 *
-	 * @param intent
+	 * @param intent the name of the intent that will trigger the state change
 	 */
 	public void send(String intent) {
 		log.debug("Sending intent {} to state {}", intent, currentStateId);
