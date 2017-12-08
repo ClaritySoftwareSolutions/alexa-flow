@@ -45,6 +45,7 @@
 		<mockito.version>1.10.19</mockito.version>
 		<system-rules.version>1.16.0</system-rules.version>
 		<equalsverifier.version>2.3.1</equalsverifier.version>
+		<alexa-skills-kit-test.version>1.0.0</alexa-skills-kit-test.version>
 		<maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
 		<maven-source-plugin.version>2.4</maven-source-plugin.version>
 		<maven-javadoc-plugin.version>2.10.3</maven-javadoc-plugin.version>
@@ -125,6 +126,13 @@
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
 			<version>${equalsverifier.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>uk.co.claritysoftware</groupId>
+			<artifactId>alexa-skills-kit-test</artifactId>
+			<version>${alexa-skills-kit-test.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

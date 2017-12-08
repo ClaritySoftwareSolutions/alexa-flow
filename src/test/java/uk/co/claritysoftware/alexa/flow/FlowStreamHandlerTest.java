@@ -2,7 +2,7 @@ package uk.co.claritysoftware.alexa.flow;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
-import static uk.co.claritysoftware.alexa.testsupport.assertj.SpeechletRequestStreamHandlerAssert.assertThat;
+import static uk.co.claritysoftware.alexa.skills.kit.test.assertj.SpeechletRequestStreamHandlerAssert.assertThat;
 
 import java.util.Set;
 import java.util.stream.Collectors;
